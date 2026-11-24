@@ -1,17 +1,15 @@
-// news-image-20261123 entry (Node 22, standard library only).
-// The image for this entry is the entry.png next to this file, composed
-// during the build. This program just places an exact copy of it at
-// /output/entry.png (or $MAKEFUN_OUTPUT_DIR/entry.png when that is set),
-// so both grader runs write the same bytes. It reads nothing else and
-// needs no network.
-
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+// news-image-20261123 entry: copies the pre-rendered front page to the
+// grader's output directory. Deterministic: a byte-for-byte copy, no
+// network, no timestamps in the output.
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-const target = join(outDir, "entry.png");
-
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const src = join(here, 'entry.png');
+if (!existsSync(src)) throw new Error(`missing entry image: ${src}`);
+const bytes = readFileSync(src);
 mkdirSync(outDir, { recursive: true });
-writeFileSync(target, readFileSync(join(here, "entry.png")));
+writeFileSync(join(outDir, 'entry.png'), bytes);
+console.log(`wrote ${bytes.length} bytes to ${join(outDir, 'entry.png')}`);
